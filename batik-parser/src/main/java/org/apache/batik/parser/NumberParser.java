@@ -205,7 +205,11 @@ public abstract class NumberParser extends AbstractParser {
             mant = -mant;
         }
 
-        return buildFloat(mant, exp);
+        float parsedFloat = buildFloat(mant, exp);
+        if (!Float.isFinite(parsedFloat)) {
+            reportError("float.range", new Object[]{});
+        }
+        return parsedFloat;
     }
 
     /**
