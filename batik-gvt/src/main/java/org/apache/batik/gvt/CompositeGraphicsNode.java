@@ -190,6 +190,19 @@ public class CompositeGraphicsNode extends AbstractGraphicsNode
     }
 
     /**
+     * Test if a rectangle is finite. This means its x, y, width and height
+     * are all finite.
+     * @param rc a rectangle
+     * @return true if it is finite.
+     */
+    private static boolean isFiniteRect(Rectangle2D rc) {
+        return Double.isFinite(rc.getX())
+                && Double.isFinite(rc.getY())
+                && Double.isFinite(rc.getWidth())
+                && Double.isFinite(rc.getHeight());
+    }
+
+    /**
      * Returns the bounds of the area covered by this node's primitive paint.
      */
     public Rectangle2D getPrimitiveBounds() {
@@ -204,7 +217,8 @@ public class CompositeGraphicsNode extends AbstractGraphicsNode
         int i=0;
         Rectangle2D bounds = null;
         while ((bounds == null) && i < count) {
-            bounds = children[i++].getTransformedBounds(IDENTITY);
+            Rectangle2D ctb = children[i++].getTransformedBounds(IDENTITY);
+            if (isFiniteRect(ctb)) { bounds = ctb; }
             if (((i & 0x0F) == 0) && HaltingThread.hasBeenHalted( currentThread ))
                 break; // check every 16 children if we have been interrupted.
         }
@@ -222,7 +236,7 @@ public class CompositeGraphicsNode extends AbstractGraphicsNode
 
         while (i < count) {
             Rectangle2D ctb = children[i++].getTransformedBounds(IDENTITY);
-            if (ctb != null) {
+            if (ctb != null && isFiniteRect(ctb)) {
                 if (primitiveBounds == null) {
                     // another thread has set the primitive bounds to null,
                     // need to recall this function
